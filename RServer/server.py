@@ -46,27 +46,32 @@ while True:
 
     def list_files():
         print("Listing files...")
-        # Get list of files in directory
-        listing = os.listdir(os.getcwd())
-        # Send over the number of files, so the client knows what to expect (and avoid some errors)
-        conn.send(struct.pack("i", len(listing)))
-        total_directory_size = 0
-        # Send over the file names and sizes while totaling the directory size
-        for i in listing:
-            # File name size
-            conn.send(struct.pack("i", sys.getsizeof(i)))
-            # File name
-            conn.send(i.encode())
-            # File content size
-            conn.send(struct.pack("i", os.path.getsize(i)))
-            total_directory_size += os.path.getsize(i)
-            # Make sure that the client and server are synchronized
+        try:
+            # Get list of files in directory
+            listing = os.listdir(os.getcwd())
+            # Send over the number of files, so the client knows what to expect (and avoid some errors)
+            conn.send(struct.pack("i", len(listing)))
+            total_directory_size = 0
+            # Send over the file names and sizes while totaling the directory size
+            for filename in listing:
+                filepath = os.path.join(os.getcwd(), filename)
+                filesize = os.path.getsize(filepath)
+                # File name size
+                conn.send(struct.pack("i", len(filename.encode())))
+                # File name
+                conn.send(filename.encode())
+                # File content size
+                conn.send(struct.pack("i", filesize))
+                total_directory_size += filesize
+                # Make sure that the client and server are synchronized
+                conn.recv(BUFFER_SIZE)
+            # Sum of file sizes in directory
+            conn.send(struct.pack("i", total_directory_size))
+            # Final check
             conn.recv(BUFFER_SIZE)
-        # Sum of file sizes in directory
-        conn.send(struct.pack("i", total_directory_size))
-        # Final check
-        conn.recv(BUFFER_SIZE)
-        print("Successfully sent file listing")
+            print("Successfully sent file listing")
+        except Exception as e:
+            print("Error listing files:", e)
 
     def dwld():
         conn.send(b"1")
