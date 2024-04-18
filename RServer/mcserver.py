@@ -5,9 +5,9 @@ import struct
 import time
 import threading
 import auth
-
+import log as log
 # Initialize socket stuff
-TCP_IP = "10.10.48.123"  # Listen on all available network interfaces
+TCP_IP = "192.168.0.136"  # Listen on all available network interfaces
 TCP_PORT = 1456  # Just a random choice
 BUFFER_SIZE = 1024  # Standard size
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -45,6 +45,8 @@ def handle_client(conn, addr):
         # Send upload performance details
         conn.send(struct.pack("f", time.time() - start_time))
         conn.send(struct.pack("i", file_size))
+        return file_name
+
 
     def list_files():
         print("Listing files...")
@@ -74,6 +76,7 @@ def handle_client(conn, addr):
             print("Successfully sent file listing")
         except Exception as e:
             print("Error listing files:", e)
+            
 
     def dwld():
         conn.send(b"1")
@@ -102,7 +105,7 @@ def handle_client(conn, addr):
         # Get client go-ahead, then send download details
         conn.recv(BUFFER_SIZE)
         conn.send(struct.pack("f", time.time() - start_time))
-        return
+        return file_name
 
     def delf():
         # Send go-ahead
@@ -123,6 +126,7 @@ def handle_client(conn, addr):
                 # Delete file
                 os.remove(file_name)
                 conn.send(struct.pack("i", 1))
+                return file_name
             except:
                 # Unable to delete file
                 print("Failed to delete {}".format(file_name))
@@ -131,7 +135,6 @@ def handle_client(conn, addr):
             # User abandoned deletion
             # The server probably received "N", but else used as a safety catch-all
             print("Delete abandoned by client!")
-            return
 
     def quit():
         # Send quit confirmation
@@ -143,20 +146,21 @@ def handle_client(conn, addr):
 
 
     # Authenticate client
-    authenticated = False
-    while not authenticated:
-        conn.send(b"AUTH")
-        username = conn.recv(BUFFER_SIZE).decode()
-        password = conn.recv(BUFFER_SIZE).decode()
-        auth_result = auth.authenticate(username, password)
-        if auth_result == 'AuthSuccess':
-            authenticated = True
-            print("Authentication successful for user:", username)
-            conn.send(b"1")  # Send authentication success message to client
-        else:
-            print("Authentication failed for user:", username)
-            conn.send(b"0")  # Send authentication failure message to client
-            continue
+    username = ""
+    # authenticated = False
+    # while not authenticated:
+    #     conn.send(b"AUTH")
+    #     username = conn.recv(BUFFER_SIZE).decode()
+    #     password = conn.recv(BUFFER_SIZE).decode()
+    #     auth_result = auth.authenticate(username, password)
+    #     if auth_result == 'AuthSuccess':
+    #         authenticated = True
+    #         print("Authentication successful for user:", username)
+    #         conn.send(b"1")  # Send authentication success message to client
+    #     else:
+    #         print("Authentication failed for user:", username)
+    #         conn.send(b"0")  # Send authentication failure message to client
+    #         continue
 
     while True:
         # Enter into a while loop to receive commands from client
@@ -165,13 +169,16 @@ def handle_client(conn, addr):
         print("\nReceived instruction: {}".format(data))
         # Check the command and respond correctly
         if data == "UPLD":
-            upld()
+            file_name = upld()
+            log.upload_event(file_name,username)
         elif data == "LIST":
             list_files()
         elif data == "DWLD":
-            dwld()
+            file_name = dwld()
+            log.download_event(file_name,username)
         elif data == "DELF":
-            delf()
+            file_name = delf()
+            log.delete_event(file_name,username)
         elif data == "QUIT":
             quit()
             break

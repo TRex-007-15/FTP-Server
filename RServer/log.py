@@ -27,13 +27,3 @@ def read_log():
 def clear_log():
     open('log.txt', 'w').close()
 
-# Example usage:
-username = "user123"
-login_event(username)
-delete_event("file.txt",username)
-upload_event("local_file.txt",username)
-download_event("remote_file.txt",username)
-logout_event(username)
-read_log()
-clear_log()
-read_log()

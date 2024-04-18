@@ -5,7 +5,7 @@ import struct
 import time
 
 # Initialize socket stuff
-TCP_IP = "10.10.50.219"  # Listen on all available network interfaces
+TCP_IP = "10.10.50.27"  # Listen on all available network interfaces
 TCP_PORT = 1456  # Just a random choice
 BUFFER_SIZE = 1024  # Standard size
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -19,19 +19,19 @@ def conn():
         print("Connection unsuccessful. Make sure the server is online.")
 
     # Authentication
-    authenticated = False
-    while not authenticated:
-        s.send(b"AUTH")
-        username = input("Enter your username: ")
-        password = input("Enter your password: ")
-        s.send(username.encode())
-        s.send(password.encode())
-        auth_status = s.recv(BUFFER_SIZE).decode()
-        if auth_status == "1":
-            authenticated = True
-            print("Authentication successful")
-        else:
-            print("Authentication failed, please try again")
+    # authenticated = False
+    # while not authenticated:
+    #     s.send(b"AUTH")
+    #     username = input("Enter your username: ")
+    #     password = input("Enter your password: ")
+    #     s.send(username.encode())
+    #     s.send(password.encode())
+    #     auth_status = s.recv(BUFFER_SIZE).decode()
+    #     if auth_status == "1":
+    #         authenticated = True
+    #         print("Authentication successful")
+    #     else:
+    #         print("Authentication failed, please try again")
 
 def upld(file_name):
     # Upload a file
