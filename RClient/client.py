@@ -2,7 +2,6 @@ import socket
 import sys
 import os
 import struct
-
 # Initialize socket stuff
 TCP_IP = input("Enter server IP address: ")  # IP address of the server
 TCP_PORT = 1456  # Same port as server
@@ -229,7 +228,7 @@ def quit():
     print("Server connection ended")
     return
 
-print("\n\nWelcome to the FTP client.\n\nCall one of the following functions:\nCONN           : Connect to server\nUPLD file_path : Upload file\nLIST           : List files\nDWLD file_path : Download file\nDELF file_path : Delete file\nQUIT           : Exit")
+print("\n\nWelcome to the FTP client.\n\nCall one of the following functions:\nCONN           : Connect to server\nUPLD file_path : Upload file\nLIST           : List files\nDWLD file_path : Download file\nDELF file_path : Delete file\nRDLOG           :   Read log\nCLRLOG          :   Clear Log\nQUIT           : Exit")
 
 while True:
     # Listen for a command
@@ -244,6 +243,12 @@ while True:
         dwld(prompt[5:])
     elif prompt[:4].upper() == "DELF":
         delf(prompt[5:])
+    elif prompt[:5].upper() == "RDLOG":
+        msg = "RDLOG"
+        s.send(msg.encode())
+    elif prompt[:6].upper() == "CLRLOG":
+        msg = "CLRLOG"
+        s.send(msg.encode())
     elif prompt[:4].upper() == "QUIT":
         quit()
         break

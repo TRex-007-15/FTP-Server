@@ -179,6 +179,11 @@ def handle_client(conn, addr):
         elif data == "DELF":
             file_name = delf()
             log.delete_event(file_name,username)
+        elif data == "RDLOG":
+            log_txt = log.read_log()
+            conn.send(log_txt)
+        elif data == "CLRLOG":
+            log.clear_log()
         elif data == "QUIT":
             quit()
             break
