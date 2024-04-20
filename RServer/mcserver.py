@@ -7,7 +7,7 @@ import threading
 import auth
 
 # Initialize socket stuff
-TCP_IP = "10.10.48.123"  # Listen on all available network interfaces
+TCP_IP = "10.10.49.91"  # Listen on all available network interfaces
 TCP_PORT = 1456  # Just a random choice
 BUFFER_SIZE = 1024  # Standard size
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -139,24 +139,39 @@ def handle_client(conn, addr):
         # Close and restart the server
         conn.close()
         s.close()
-        os.execl(sys.executable, sys.executable, *sys.argv)
+        # os.execl(sys.executable, sys.executable, *sys.argv)
 
 
     # Authenticate client
     authenticated = False
     while not authenticated:
-        conn.send(b"AUTH")
+        # conn.send(b"AUTH")
+        action = conn.recv(BUFFER_SIZE).decode()
         username = conn.recv(BUFFER_SIZE).decode()
+        conn.send(username.encode())
         password = conn.recv(BUFFER_SIZE).decode()
-        auth_result = auth.authenticate(username, password)
-        if auth_result == 'AuthSuccess':
-            authenticated = True
-            print("Authentication successful for user:", username)
-            conn.send(b"1")  # Send authentication success message to client
-        else:
-            print("Authentication failed for user:", username)
-            conn.send(b"0")  # Send authentication failure message to client
-            continue
+        conn.send(username.encode())
+        if action == "LOGIN":
+            auth_result = auth.authenticate(username, password)
+            if auth_result == 'AuthSuccess':
+                authenticated = True
+                print("Authentication successful for user:", username)
+                conn.send(b"1")  # Send authentication success message to client
+            else:
+                print("Authentication failed for user:", username)
+                conn.send(b"0")  # Send authentication failure message to client
+                continue
+        elif action == "SIGNUP":
+            auth_result = auth.addUser(username, password)
+            if auth_result == 'AuthSuccess':
+                authenticated = True
+                print("Authentication successful for user:", username)
+                conn.send(b"1")  # Send authentication success message to client
+            else:
+                print("Authentication failed for user:", username)
+                conn.send(b"0")  # Send authentication failure message to client
+        else: 
+            print("Please enter a valid action.")
 
     while True:
         # Enter into a while loop to receive commands from client

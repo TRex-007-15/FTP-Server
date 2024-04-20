@@ -21,17 +21,33 @@ def conn():
     # Authentication
     authenticated = False
     while not authenticated:
-        s.send(b"AUTH")
+        print("\nChoose an action.")
+        action = input("LOGIN or SIGNUP: ").upper()
+        s.send(action.upper().encode())
         username = input("Enter your username: ")
-        password = input("Enter your password: ")
         s.send(username.encode())
+        s.recv(BUFFER_SIZE)
+        password = input("Enter your password: ")
         s.send(password.encode())
-        auth_status = s.recv(BUFFER_SIZE).decode()
-        if auth_status == "1":
-            authenticated = True
-            print("Authentication successful")
-        else:
-            print("Authentication failed, please try again")
+        s.recv(BUFFER_SIZE)
+        if action == 'LOGIN':
+            auth_status = s.recv(BUFFER_SIZE).decode()
+            if auth_status == "1":
+                authenticated = True
+                print("Authentication successful")
+            else:
+                print("Authentication failed, please try again")
+        elif action == 'SIGNUP':
+            auth_status = s.recv(BUFFER_SIZE).decode()
+            if auth_status == '1':
+                print("User created successfully")
+                print("You can now login with your credentials")
+            else:
+                print("This username already exists")
+                print("Please try again with a different username.")
+        else: 
+            print("Please enter a valid action.")
+                
 
 def upld(file_name):
     # Upload a file
