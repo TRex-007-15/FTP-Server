@@ -21,7 +21,7 @@ def logout_event(username):
 
 def read_log():
     with open("log.txt","+r") as logfile:
-        data = logfile.readlines()
+        data = logfile.read()
         return data
 def clear_log():
     open('log.txt', 'w').close()

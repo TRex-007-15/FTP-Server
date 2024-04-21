@@ -7,7 +7,7 @@ import threading
 import auth
 import log as log
 # Initialize socket stuff
-TCP_IP = "10.10.49.91"  # Listen on all available network interfaces
+TCP_IP = "10.10.48.227"  # Listen on all available network interfaces
 TCP_PORT = 1456  # Just a random choice
 BUFFER_SIZE = 1024  # Standard size
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -195,7 +195,7 @@ def handle_client(conn, addr):
             log.delete_event(file_name,username)
         elif data == "RDLOG":
             log_txt = log.read_log()
-            conn.send(log_txt)
+            conn.send(log_txt.encode())
         elif data == "CLRLOG":
             log.clear_log()
         elif data == "QUIT":
