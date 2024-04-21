@@ -262,6 +262,8 @@ while True:
     elif prompt[:5].upper() == "RDLOG":
         msg = "RDLOG"
         s.send(msg.encode())
+        log = s.recv(BUFFER_SIZE)
+        print(log.decode())
     elif prompt[:6].upper() == "CLRLOG":
         msg = "CLRLOG"
         s.send(msg.encode())
