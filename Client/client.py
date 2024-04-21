@@ -2,11 +2,10 @@ import socket
 import sys
 import os
 import struct
-
-# Initialise socket stuff
-TCP_IP = "127.0.0.1"  # Only a local server
-TCP_PORT = 1456  # Just a random choice
-BUFFER_SIZE = 1024  # Standard chioce
+# Initialize socket stuff
+TCP_IP = input("Enter server IP address: ")  # IP address of the server
+TCP_PORT = 1456  # Same port as server
+BUFFER_SIZE = 1024  # Standard choice
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def conn():
@@ -17,6 +16,37 @@ def conn():
         print("Connection successful")
     except:
         print("Connection unsuccessful. Make sure the server is online.")
+
+    # Authentication
+    authenticated = False
+    while not authenticated:
+        print("\nChoose an action.")
+        action = input("LOGIN or SIGNUP: ").upper()
+        s.send(action.upper().encode())
+        username = input("Enter your username: ")
+        s.send(username.encode())
+        s.recv(BUFFER_SIZE)
+        password = input("Enter your password: ")
+        s.send(password.encode())
+        s.recv(BUFFER_SIZE)
+        if action == 'LOGIN':
+            auth_status = s.recv(BUFFER_SIZE).decode()
+            if auth_status == "1":
+                authenticated = True
+                print("Authentication successful")
+            else:
+                print("Authentication failed, please try again")
+        elif action == 'SIGNUP':
+            auth_status = s.recv(BUFFER_SIZE).decode()
+            if auth_status == '1':
+                print("User created successfully")
+                print("You can now login with your credentials")
+            else:
+                print("This username already exists")
+                print("Please try again with a different username.")
+        else: 
+            print("Please enter a valid action.")
+                
 
 def upld(file_name):
     # Upload a file
@@ -176,9 +206,10 @@ def delf(file_name):
         # Confirm user wants to delete file
         confirm_delete = input("Are you sure you want to delete {}? (Y/N)\n".format(file_name)).upper()
         # Make sure input is valid
+        # Unfortunately python doesn't have a do while style loop, as that would have been better here
         while confirm_delete != "Y" and confirm_delete != "N" and confirm_delete != "YES" and confirm_delete != "NO":
             # If user input is invalid
-            print("Command not recognised, try again")
+            print("Command not recognized, try again")
             confirm_delete = input("Are you sure you want to delete {}? (Y/N)\n".format(file_name)).upper()
     except:
         print("Couldn't confirm deletion status")
@@ -213,7 +244,7 @@ def quit():
     print("Server connection ended")
     return
 
-print("\n\nWelcome to the FTP client.\n\nCall one of the following functions:\nCONN           : Connect to server\nUPLD file_path : Upload file\nLIST           : List files\nDWLD file_path : Download file\nDELF file_path : Delete file\nQUIT           : Exit")
+print("\n\nWelcome to the FTP client.\n\nCall one of the following functions:\nCONN           : Connect to server\nUPLD file_path : Upload file\nLIST           : List files\nDWLD file_path : Download file\nDELF file_path : Delete file\nRDLOG           :   Read log\nCLRLOG          :   Clear Log\nQUIT           : Exit")
 
 while True:
     # Listen for a command
@@ -228,8 +259,14 @@ while True:
         dwld(prompt[5:])
     elif prompt[:4].upper() == "DELF":
         delf(prompt[5:])
+    elif prompt[:5].upper() == "RDLOG":
+        msg = "RDLOG"
+        s.send(msg.encode())
+    elif prompt[:6].upper() == "CLRLOG":
+        msg = "CLRLOG"
+        s.send(msg.encode())
     elif prompt[:4].upper() == "QUIT":
         quit()
         break
     else:
-        print("Command not recognised; please try again")
+        print("Command not recognized; please try again")
